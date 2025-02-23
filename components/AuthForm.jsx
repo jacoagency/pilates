@@ -4,11 +4,13 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 const AuthForm = ({ mode = 'login' }) => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,12 +31,15 @@ const AuthForm = ({ mode = 'login' }) => {
 
         if (res?.error) {
           setError("Credenciales inválidas");
+          toast.error("Credenciales inválidas");
           return;
         }
 
+        toast.success("¡Bienvenido de nuevo!");
         router.replace("/dashboard");
       } catch (error) {
         console.log(error);
+        toast.error("Error al iniciar sesión");
       } finally {
         setLoading(false);
       }
@@ -54,17 +59,33 @@ const AuthForm = ({ mode = 'login' }) => {
         });
 
         if (res.ok) {
-          router.push("/login");
+          setRedirecting(true);
+          toast.success("¡Cuenta creada exitosamente!");
+          setTimeout(() => {
+            router.push("/login");
+          }, 2000);
         } else {
           const data = await res.json();
           setError(data.message || "Error al registrar usuario");
+          toast.error(data.message || "Error al registrar usuario");
+          setLoading(false);
         }
       } catch (error) {
         console.log(error);
         setError("Error al conectar con el servidor");
-      } finally {
+        toast.error("Error al conectar con el servidor");
         setLoading(false);
       }
+    }
+  };
+
+  const getButtonText = () => {
+    if (mode === 'login') {
+      return loading ? "Iniciando sesión..." : "Iniciar Sesión";
+    } else {
+      if (redirecting) return "Redirigiendo...";
+      if (loading) return "Creando cuenta...";
+      return "Crear Cuenta";
     }
   };
 
@@ -84,7 +105,7 @@ const AuthForm = ({ mode = 'login' }) => {
                 type="text"
                 id="name"
                 name="name"
-                className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors"
+                className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors text-lg text-[#4A4033]"
                 required
               />
             </div>
@@ -97,7 +118,7 @@ const AuthForm = ({ mode = 'login' }) => {
               type="email"
               id="email"
               name="email"
-              className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors"
+              className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors text-lg text-[#4A4033]"
               required
             />
           </div>
@@ -109,7 +130,7 @@ const AuthForm = ({ mode = 'login' }) => {
               type="password"
               id="password"
               name="password"
-              className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors"
+              className="w-full p-3 border border-[#B5A69C]/20 rounded focus:outline-none focus:border-[#B5A69C] transition-colors text-lg text-[#4A4033]"
               required
             />
           </div>
@@ -118,13 +139,10 @@ const AuthForm = ({ mode = 'login' }) => {
           )}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || redirecting}
             className="w-full bg-[#B5A69C] text-white py-3 rounded hover:bg-[#8A7F76] transition-colors disabled:opacity-70"
           >
-            {loading 
-              ? (mode === 'login' ? "Iniciando sesión..." : "Creando cuenta...") 
-              : (mode === 'login' ? "Iniciar Sesión" : "Crear Cuenta")
-            }
+            {getButtonText()}
           </button>
         </form>
         <p className="mt-6 text-center text-[#8A7F76]">
