@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import DashboardHeader from "@/components/DashboardHeader";
+import BookingCalendar from '@/components/BookingCalendar';
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
@@ -24,6 +25,8 @@ export default async function Dashboard() {
           </h1>
           
           <div className="grid md:grid-cols-2 gap-8">
+            <BookingCalendar />
+
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <h2 className="text-2xl font-light text-[#8A7F76] mb-4">
                 Tus Próximas Clases
