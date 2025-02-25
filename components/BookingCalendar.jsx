@@ -34,6 +34,23 @@ const BookingCalendar = () => {
     }
   }, [selectedDate]);
 
+  useEffect(() => {
+    const handleBookingCancelled = () => {
+      if (selectedDate) {
+        const daySlots = timeSlots[getDayName(selectedDate)] || [];
+        daySlots.forEach(time => {
+          checkAvailability(selectedDate, time);
+        });
+      }
+    };
+
+    window.addEventListener('bookingCancelled', handleBookingCancelled);
+
+    return () => {
+      window.removeEventListener('bookingCancelled', handleBookingCancelled);
+    };
+  }, [selectedDate]);
+
   const getDayName = (date) => {
     return format(date, 'EEEE', { locale: es }).toUpperCase();
   };
