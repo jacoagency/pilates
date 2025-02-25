@@ -22,9 +22,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
+    // Crear fecha combinando la fecha seleccionada con la hora del timeSlot
+    const [hours, minutes] = timeSlot.split(':').map(Number);
+    const bookingDate = new Date(date);
+    bookingDate.setHours(hours, minutes, 0, 0);
+
     // Verificar disponibilidad
     const existingBookings = await Booking.countDocuments({
-      date: new Date(date),
+      date: bookingDate,
       timeSlot,
     });
 
@@ -37,7 +42,7 @@ export async function POST(req: Request) {
 
     // Encontrar una cama disponible
     const bookedBeds = await Booking.find({
-      date: new Date(date),
+      date: bookingDate,
       timeSlot,
     }).distinct('bedNumber');
 
@@ -49,10 +54,10 @@ export async function POST(req: Request) {
       }
     }
 
-    // Crear la reserva
+    // Crear la reserva con la fecha correcta
     const booking = await Booking.create({
-      userId: user._id, // Usamos el _id del documento del usuario
-      date: new Date(date),
+      userId: user._id,
+      date: bookingDate,
       timeSlot,
       bedNumber: availableBed,
     });

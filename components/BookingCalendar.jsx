@@ -25,10 +25,14 @@ const BookingCalendar = () => {
   const maxDate = addDays(today, 14); // 2 semanas desde hoy
 
   useEffect(() => {
-    if (selectedDate && selectedTime) {
-      checkAvailability(selectedDate, selectedTime);
+    if (selectedDate) {
+      // Cargar disponibilidad para todos los horarios del día seleccionado
+      const daySlots = timeSlots[getDayName(selectedDate)] || [];
+      daySlots.forEach(time => {
+        checkAvailability(selectedDate, time);
+      });
     }
-  }, [selectedDate, selectedTime]);
+  }, [selectedDate]);
 
   const getDayName = (date) => {
     return format(date, 'EEEE', { locale: es }).toUpperCase();
@@ -86,8 +90,14 @@ const BookingCalendar = () => {
 
       toast.success('¡Reserva realizada con éxito!');
       setSelectedTime(null);
-      // Recargar disponibilidad
-      await checkAvailability(selectedDate, selectedTime);
+      
+      // Disparar evento para actualizar las reservas
+      const event = new CustomEvent('bookingCreated');
+      window.dispatchEvent(event);
+      
+      // Recargar disponibilidad de todos los horarios del día
+      const daySlots = timeSlots[getDayName(selectedDate)] || [];
+      await Promise.all(daySlots.map(time => checkAvailability(selectedDate, time)));
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -155,7 +165,9 @@ const BookingCalendar = () => {
                 >
                   <span>{time}</span>
                   {availableBeds !== undefined && (
-                    <span className="text-xs block mt-1">
+                    <span className={`text-xs block mt-1 ${
+                      availableBeds <= 2 ? 'text-red-500' : ''
+                    }`}>
                       {availableBeds} {availableBeds === 1 ? 'lugar' : 'lugares'}
                     </span>
                   )}
