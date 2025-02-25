@@ -36,7 +36,11 @@ const AuthForm = ({ mode = 'login' }) => {
         }
 
         toast.success("¡Bienvenido de nuevo!");
-        router.replace("/dashboard");
+        if (email === 'ventas@jacoagency.io') {
+          router.replace("/panel");
+        } else {
+          router.replace("/dashboard");
+        }
       } catch (error) {
         console.log(error);
         toast.error("Error al iniciar sesión");

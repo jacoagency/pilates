@@ -1,58 +1,55 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import DashboardHeader from "@/components/DashboardHeader";
+import AdminHeader from "../../components/AdminHeader";
 
-export default async function Dashboard() {
+export default async function AdminPanel() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || session.user?.email !== 'ventas@jacoagency.io') {
     redirect("/login");
-  }
-
-  if (session.user?.email === 'ventas@jacoagency.io') {
-    redirect("/panel");
   }
 
   return (
     <div className="min-h-screen bg-[#F8F5F1]">
-      <DashboardHeader />
+      <AdminHeader />
       <main className="pt-24 px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-light text-[#B5A69C] mb-8">
-            Bienvenido a tu Dashboard
+            Panel de Administración
           </h1>
           
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <h2 className="text-2xl font-light text-[#8A7F76] mb-4">
-                Tus Próximas Clases
+                Estadísticas Generales
               </h2>
               <div className="space-y-4">
                 <div className="p-4 border border-[#B5A69C]/20 rounded">
-                  <p className="text-[#B5A69C] font-medium">Reformer Flow</p>
-                  <p className="text-[#8A7F76]">Martes, 10:00 AM</p>
+                  <p className="text-[#B5A69C] font-medium">Total de Usuarios</p>
+                  <p className="text-[#8A7F76] text-2xl">150</p>
                 </div>
                 <div className="p-4 border border-[#B5A69C]/20 rounded">
-                  <p className="text-[#B5A69C] font-medium">Private Session</p>
-                  <p className="text-[#8A7F76]">Jueves, 3:00 PM</p>
+                  <p className="text-[#B5A69C] font-medium">Clases Programadas</p>
+                  <p className="text-[#8A7F76] text-2xl">24</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <h2 className="text-2xl font-light text-[#8A7F76] mb-4">
-                Tu Progreso
+                Acciones Rápidas
               </h2>
               <div className="space-y-4">
-                <div className="p-4 border border-[#B5A69C]/20 rounded">
-                  <p className="text-[#B5A69C] font-medium">Clases Completadas</p>
-                  <p className="text-[#8A7F76] text-2xl">12</p>
-                </div>
-                <div className="p-4 border border-[#B5A69C]/20 rounded">
-                  <p className="text-[#B5A69C] font-medium">Horas Practicadas</p>
-                  <p className="text-[#8A7F76] text-2xl">24</p>
-                </div>
+                <button className="w-full p-4 border border-[#B5A69C] text-[#B5A69C] rounded hover:bg-[#B5A69C] hover:text-white transition-colors">
+                  Gestionar Usuarios
+                </button>
+                <button className="w-full p-4 border border-[#B5A69C] text-[#B5A69C] rounded hover:bg-[#B5A69C] hover:text-white transition-colors">
+                  Gestionar Clases
+                </button>
+                <button className="w-full p-4 border border-[#B5A69C] text-[#B5A69C] rounded hover:bg-[#B5A69C] hover:text-white transition-colors">
+                  Ver Reportes
+                </button>
               </div>
             </div>
           </div>
