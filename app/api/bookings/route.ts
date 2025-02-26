@@ -4,6 +4,11 @@ import { connectMongoDB } from "@/lib/mongodb";
 import Booking from "@/models/booking";
 import { authOptions } from "../auth/[...nextauth]/route";
 import User from "@/models/user";
+import { resend } from '@/lib/resend';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { BookingConfirmationEmail } from '@/components/emails/BookingConfirmation';
+import type { ReactElement } from 'react';
 
 export async function POST(req: Request) {
   try {
@@ -61,6 +66,31 @@ export async function POST(req: Request) {
       timeSlot,
       bedNumber: availableBed,
     });
+
+    // Enviar email de confirmación
+    try {
+      const formattedDate = format(bookingDate, "EEEE d 'de' MMMM", { locale: es });
+      
+      console.log('Intentando enviar email a:', session.user.email);
+      
+      const emailContent = BookingConfirmationEmail({
+        userName: user.name,
+        date: formattedDate,
+        time: timeSlot,
+        bedNumber: availableBed,
+      }) as ReactElement;
+
+      const emailResponse = await resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: session.user.email,
+        subject: 'Confirmación de Reserva - Reformer Flow',
+        react: emailContent
+      });
+
+      console.log('Email enviado:', emailResponse);
+    } catch (emailError) {
+      console.error('Error enviando email:', emailError);
+    }
 
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
