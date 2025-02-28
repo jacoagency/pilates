@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       }) as ReactElement;
 
       const emailResponse = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'ventas@jacoagency.io',
         to: session.user.email,
         subject: 'Confirmación de Reserva - Reformer Flow',
         react: emailContent
